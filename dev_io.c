@@ -9,21 +9,6 @@
 #include "MQTTPACKET.H"	
 #include "string.h"
 
-
-code unsigned char at_mode[14]={'A','T','+','C','W','M','O','D','E','=','1',0x0D,0x0A,'\0'}; 
-
-
-code char Connect[133]=
-{0x10,0x82,0x01,0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03,0xc2,0x00,0x3c,0x00
-,0x24,0x64,0x63,0x37,0x37,0x63,0x32,0x32,0x30,0x2d,0x34,0x64,0x38,0x33,0x2d,0x31
-,0x31,0x65,0x37,0x2d,0x39,0x30,0x64,0x63,0x2d,0x63,0x64,0x36,0x33,0x39,0x63,0x61
-,0x39,0x30,0x39,0x61,0x38,0x00,0x24,0x37,0x37,0x32,0x36,0x31,0x62,0x62,0x30,0x2d
-,0x34,0x64,0x32,0x65,0x2d,0x31,0x31,0x65,0x37,0x2d,0x61,0x31,0x63,0x38,0x2d,0x30
-,0x33,0x61,0x33,0x31,0x30,0x62,0x30,0x37,0x62,0x62,0x32,0x00,0x28,0x36,0x65,0x63
-,0x64,0x63,0x37,0x34,0x31,0x39,0x39,0x64,0x34,0x62,0x34,0x33,0x64,0x37,0x63,0x30
-,0x31,0x63,0x34,0x63,0x36,0x34,0x30,0x31,0x36,0x32,0x62,0x37,0x31,0x61,0x62,0x35
-,0x30,0x61,0x37,0x37,0x63};	 
-
 code char Subs[96]=
 {0x82,0x5e,0x00,0x01,0x00,0x59,0x76,0x31,0x2f,0x37,0x37,0x32,0x36,0x31,0x62,0x62
 ,0x30,0x2d,0x34,0x64,0x32,0x65,0x2d,0x31,0x31,0x65,0x37,0x2d,0x61,0x31,0x63,0x38
@@ -47,46 +32,7 @@ extern unsigned char count;
 unsigned char Lig=1;
 unsigned char CountineCheck=0;
 
-void Publish0(void)
-{
-	unsigned char len=0;
-	for(len=0;len<93;len++)
-	{
-		Serial0_SendChar(Publish[len]);
-	}
-	Serial0_SendChar(0x33);
-	Serial0_SendChar(0x30);
-}
-void Publish1(void)
-{
-	unsigned char len=0;
-	for(len=0;len<93;len++)
-	{
-		Serial0_SendChar(Publish[len]);
-	}
-	Serial0_SendChar(0x33);
-	Serial0_SendChar(0x31);
-}
-void Publish60(void)
-{
-	unsigned char len=0;
-	for(len=0;len<93;len++)
-	{
-		Serial0_SendChar(Publish[len]);
-	}
-	Serial0_SendChar(0x36);
-	Serial0_SendChar(0x30);
-}
-void Publish61(void)
-{
-	unsigned char len=0;
-	for(len=0;len<93;len++)
-	{
-		Serial0_SendChar(Publish[len]);
-	}
-	Serial0_SendChar(0x36);
-	Serial0_SendChar(0x35);
-}
+
 
 void MQTTPublish0(char channel, char value)
 {
@@ -167,13 +113,9 @@ void MQTTPublish1(char channel, char value)
 }
 
 void main(void)
-{  
-	/*****************************************
- 	* Write to slave device with
- 	* slave address e.g. say 0x20
- 	*****************************************/
-	//unsigned char ack;
-	//MQTTClient_connectOptions pdata a;
+{ 
+	int Light1=0;
+	int i;
 
 	int len=0;
 	MQTTHeader header = {0};
@@ -190,12 +132,13 @@ void main(void)
 
 	ssd1306_initalize();
 	ssd1306_clear();
-	ssd1306_printf("Zhiyong Xiao");
+	ssd1306_printf("|   Mydevices   |   IOT Model   |   By ZY Xiao  |     2017-7    ");
 		
 	//ssd1306_draw();
 	
 		   
 	Serial0_Init();
+
 Restart:
 	Serial0_SendString("+++");
 	Delay(5000);
@@ -237,9 +180,7 @@ Restart:
 	if (count!=4) goto Restart;
 
 	ABC1Show();
-
-
-	Delay(10000);
+	Delay(3000);
 
 	//subscribe
 	for(len=0;len<96;len++)
@@ -248,100 +189,113 @@ Restart:
 	}
 	Delay(10000); 
 	ABC1Show();
-	Delay(10000);
+	Delay(3000);
 
 	PD7=0;
-	Lig=0;
+	Light1=0;
 	MQTTPublish0(2,0);
 	MQTTPublish0(3,0);
-while(1)
-{	
-	/*
-	char h,l;
-	h= (count>>4)&0x0f;
-	l=	count&0x0f;
-	if (h<0x0a)
-		temp_dataT[4]=(h+0x30);
-	else
-		temp_dataT[4]=(h+0x57);
-	if (l<0x0a)
-		temp_dataT[5]=(l+0x30);
-	else
-		temp_dataT[5]=(l+0x57);	 */
 
-	if (count>30)
-	{			
-		temp_dataT[0]=temp_dataT[count-1];
-
-		if (temp_dataT[0]==0x30)
-		{
-			PD7=0;
-			Lig=0;
-			MQTTPublish0(2,0);
-			MQTTPublish0(3,0);
-			
-		}
-		else
-		{
-			PD7=1;
-			Lig=1;
-			MQTTPublish0(2,1);
-			MQTTPublish0(3,1);
-		}
-		count=0;
-		//ABCShow();
-	}
-	//Delay(800);
-	MQTTPublish1(1, 1);
-	Delay(50);
-	if (count==4)
-		CountineCheck=0;
-	else
-		CountineCheck++;
-	if (CountineCheck==10)
-		goto Restart;
-	count=0;
-	//ABC1Show();
-	Delay(950);
-	MQTTPublish0(1, 0);
-	if (Lig==1)
-	{	
-		MQTTPublish0(3,1);	
+	ssd1306_initalize();
+	ssd1306_clear();
+	if (Light1==1){
+		ssd1306_printf("Channel 1: ON");
 	}
 	else
 	{
-		MQTTPublish0(3,0);	
+		ssd1306_printf("Channel 1: OFF");
 	}
-	Delay(1000);
-}
 
-	/*Serial0_SendString("AT+CIPSTART=\"TCP\",\"192.168.2.2\",8080");
-	Serial0_SendChar(0x0d);
-	Serial0_SendChar(0x0a);
-	Serial0_SendChar(0x00);
-	Delay(10000);  */
-
-
-//	Serial0_SendString("AT+CIPMODE=1");
-//	Serial0_SendChar(0x0d);
-//	Serial0_SendChar(0x0a);
-//	Serial0_SendChar(0x00);
-//	Delay(10000); 
-
-	//Serial0_SendString("AT+CIPSEND");
-	//Serial0_SendChar(0x0d);
-	//Serial0_SendChar(0x0a);
-	//Serial0_SendChar(0x00);
-	//Delay(10000); 
+	while(1)
+	{	
+		//temp_dataT[0]=count;ABC1Show();Delay(10000);
+		
+		//39=0x2b 
+		if (count==0x27)
+		{			
+			//temp_dataT[0]=temp_dataT[count-1];	
+			if (temp_dataT[count-1]==0x30)
+			{
+				PD7=0;
+				Light1=0;
+				MQTTPublish0(2,0);
+				MQTTPublish0(3,0);
 	
+				ssd1306_printf("Channel 1: OFF");
+			}
+			else
+			{
+				PD7=1;
+				Light1=1;
+				MQTTPublish0(2,1);
+				MQTTPublish0(3,1);
+	
+				ssd1306_printf("Channel 1: ON");
+			}
+			count=0;
+		}
+	
+		count=0;
+		MQTTPublish1(1, 0);//will receive
+		Delay(500);
+		if (count==4)
+		{	
+			CountineCheck=0; 
+			count=0;
+		}
+		else
+		{
+			CountineCheck++; 
+			count=0;
+		}
+		if (CountineCheck==10)	//disconnect check;
+			goto Restart;
 
-	//Serial0_SendString("Hahah");
-	/*Serial0_SendString("AT+CWJAP=\"zhiyong_yang\",\"26996014\"");
+		if (Light1==1)
+		{	
+			MQTTPublish0(3,1);	
+		}
+		else
+		{
+			MQTTPublish0(3,0);	
+		}
+		
+		//Delay(500);
+		MQTTPublish0(1, 1);
+		Delay(500);
+		count=0;
+	
+		//check key
+		for(i=0;i<300;i++)
+		{
+			 if (ScanKey())
+			 {
+				if (Light1==0){
+					Light1=1;
+					PD7=1;
+				    MQTTPublish0(2,1);
+					MQTTPublish0(3,1);
+					ssd1306_printf("Channel 1: ON");
+				}
+				else
+				{
+					Light1=0;
+					PD7=0;
+					MQTTPublish0(2,0);
+					MQTTPublish0(3,0);
+					ssd1306_printf("Channel 1: OFF");
+				}
+				Delay(500);
+				count=0;
+			 }	
+			 Delay(10);	 
+		}
+		//Delay(1000);
+		//end of the while loop
+	}
+	//connect internet
+	/*Serial0_SendString("AT+CWJAP=\"xxxx\",\"xxxx\"");
 	Serial0_SendChar(0x0d);
 	Serial0_SendChar(0x0a);
 	Serial0_SendChar(0x00);*/
-		 
-	LEDFlash();	
-	while(1);
-	//LEDKeyTest();
 }
