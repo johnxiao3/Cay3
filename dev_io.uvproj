@@ -376,11 +376,6 @@
               <FileType>4</FileType>
               <FilePath>..\..\Target\Lib\LP\EZUSB.LIB</FilePath>
             </File>
-            <File>
-              <FileName>MQTTPacket.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\MQTTPacket.c</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>
